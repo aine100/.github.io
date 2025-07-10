@@ -1,1 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aine's Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Ultra-modern Glassmorphism Theme */
+    :root {
+      --main-bg: #10131a;
+      --card-bg: rgba(30, 34, 45, 0.9);
+      --glass: rgba(255,255,255,0.07);
+      --accent: #7f5af0;
+      --text: #eaeaea;
+      --muted: #a0a0b3;
+      --radius: 22px;
+      --blur: 18px;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(120deg, #232946 0%, #121826 100%);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 0;
+    }
+    header {
+      width: 95vw;
+      max-width: 650px;
+      background: var(--glass);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+      padding: 32px 0 22px 0;
+      border: 1.5px solid rgba(255,255,255,0.04);
+    }
+    .username {
+      font-size: 2.3rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+    .datetime {
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+    .weather {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+    .weather img {
+      width: 32px;
+      vertical-align: middle;
+    }
+
+    main {
+      width: 95vw;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      box-shadow: 0 4px 24px 0 rgba(127,90,240,0.12), 0 1.5px 3px 0 rgba(0,0,0,0.18);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      border: 1.5px solid rgba(255,255,255,0.04);
+      margin-bottom: 0;
+    }
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+      color: var(--accent);
+      letter-spacing: 0.2px;
+    }
+    .custom-links-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .custom-link {
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 10px 18px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+      box-shadow: 0 1.5px 8px 0 rgba(127,90,240,0.06);
+    }
+    .custom-link:hover {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px 0 rgba(127,90,240,0.09);
+    }
+    .add-link-form {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+    }
+    .add-link-form input[type="text"] {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .add-link-form input[type="text"]:focus {
+      background: rgba(255,255,255,0.12);
+    }
+    .add-link-form button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .add-link-form button:hover {
+      background: #6242da;
+    }
+    @media (max-width: 650px) {
+      header, main {
+        width: 98vw;
+        max-width: 98vw;
+        padding: 0 4px;
+      }
+      .card {
+        padding: 18px 8px;
+      }
+      .card h2 {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="username">aine100's Dashboard</div>
+    <div class="datetime" id="datetime">Loading time...</div>
+    <div class="weather" id="weather">Loading weather...</div>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Custom Links</h2>
+      <ul class="custom-links-list" id="customLinks">
+        <!-- Custom links appear here -->
+      </ul>
+      <form class="add-link-form" id="addLinkForm" autocomplete="off">
+        <input type="text" id="linkName" placeholder="Link Name" required>
+        <input type="text" id="linkURL" placeholder="https://example.com" required pattern="https?://.+">
+        <button type="submit">Add Link</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    // Live Date/Time for Sligo, Ireland (UTC+1 in summer, UTC+0 in winter)
+    function updateDateTime() {
+      const now = new Date();
+      // Sligo is in Ireland, which is UTC+1 in DST (summer), UTC otherwise.
+      // Let's use toLocaleString with 'Europe/Dublin' timezone
+      const options = {
+        timeZone: 'Europe/Dublin',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      };
+      document.getElementById('datetime').textContent = now.toLocaleString('en-GB', options) + " (Sligo, IE)";
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // Weather for Sligo, Ireland
+    async function fetchWeather() {
+      // Insert your OpenWeatherMap API key below
+      const apiKey = "YOUR_API_KEY";
+      const city = "Sligo,IE";
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${sligo}&units=metric&appid=${3ff06e4d22dfcebbe807c465ed68f402}`;
+      const weatherDiv = document.getElementById('weather');
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Weather data not available");
+        const data = await resp.json();
+        const temp = Math.round(data.main.temp);
+        const desc = data.weather[0].description.replace(/^\w/, c => c.toUpperCase());
+        const icon = data.weather[0].icon;
+        weatherDiv.innerHTML = `
+          <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}">
+          <span>${desc}, ${temp}&deg;C</span>
+        `;
+      } catch (e) {
+        weatherDiv.textContent = "Weather unavailable";
+      }
+    }
+    fetchWeather();
+    // Optionally refresh every hour
+    setInterval(fetchWeather, 60 * 60 * 1000);
+
+    // Custom Links: Save to localStorage
+    const linksKey = "aine100_custom_links";
+    const linksList = document.getElementById('customLinks');
+    function renderLinks() {
+      linksList.innerHTML = '';
+      const links = JSON.parse(localStorage.getItem(linksKey) || '[]');
+      for (const link of links) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = link.url;
+        a.textContent = link.name;
+        a.className = 'custom-link';
+        a.target = '_blank';
+        li.appendChild(a);
+        linksList.appendChild(li);
+      }
+    }
+    document.getElementById('addLinkForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('linkName').value.trim();
+      const url = document.getElementById('linkURL').value.trim();
+      if (name && url) {
+        const links = JSON.parse(localStorage.getItem(linksKey) || '[]');
+        links.push({ name, url });
+        localStorage.setItem(linksKey, JSON.stringify(links));
+        renderLinks();
+        this.reset();
+      }
+    });
+    renderLinks();
+  </script>
+</body>
+</html>
 
